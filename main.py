@@ -17,5 +17,8 @@ if __name__ == "__main__":
         help="Batch size.")
     parser.add_argument("--lr", type=float, default=8e-4, 
         help="Learning rate.")
+    parser.add_argument("--load", action="store_true",
+        help="Load the model.")
+    
 
     main(parser.parse_args())

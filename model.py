@@ -24,9 +24,6 @@ class Encoder(nn.Module):
         x = torch.flatten(x, start_dim=1)
         return self.mu_out(x), self.sigma_out(x)
 
-
-
-
 class Decoder(nn.Module):
     def __init__(self, input_dim=10, hidden_size=128, z_size=128):
         super().__init__()

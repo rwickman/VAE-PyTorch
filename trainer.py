@@ -7,7 +7,6 @@ import torchvision
 import matplotlib.pyplot as plt
 
 from model import VAE
-from data_loader import TestDataset, test_dataset
 from model_util import loss_fn
 
 device = "cuda"
@@ -59,7 +58,22 @@ class Trainer:
             prefetch_factor=16,
             drop_last = True,
             shuffle=True)
+        
+        if self.args.load:
+            self.load()
 
+    def load(self):
+        model_dict = torch.load("model.pt")
+        self.vae.load_state_dict(model_dict["model"])
+        self.optim.load_state_dict(model_dict["optimizer"])
+
+    def save(self):
+        model_dict = {
+            "model": self.vae.state_dict(),
+            "optimizer": self.optim.state_dict()
+        }
+
+        torch.save(model_dict, "model.pt")
 
     def train(self):
         for i in tqdm(range(self.args.epochs)):
@@ -74,6 +88,8 @@ class Trainer:
                 loss.backward()
                 self.optim.step()
 
+            self.save()
+
     
     def test(self, plot_size = (9, 9)):
         self.vae.eval()
@@ -82,11 +98,12 @@ class Trainer:
         print("PLOTING TEST RECONSTRUCTION")
         for img, label in self.test_dataloader:    
             x_preds, _, _ = self.vae(img.to(device))
-            plot(x_preds, plot_size)
+            print("x_preds.shape", x_preds.shape)
+            plot(x_preds, (4, 8))
             break
         
         # Sample numbers
-        print("PLOTTING TEST RECONSTRUCTION")
+        print("PLOTTING RANDOM SAMPLES")
         x_preds = self.vae.generate(torch.randn(plot_size[0] * plot_size[1], 256).to(device))
         plot(x_preds, plot_size)
 
